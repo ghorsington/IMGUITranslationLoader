@@ -14,9 +14,9 @@ namespace IMGUITranslationLoader.Hook
 
     public class TranslationHooks
     {
-        public static event EventHandler<StringTranslationEventArgs> TranslateText;
         private const string PREFIX = "\u200B";
         private static readonly int PREFIX_LEN = PREFIX.Length;
+        public static event EventHandler<StringTranslationEventArgs> TranslateText;
 
         public static void OnTranslateText(ref string text)
         {
@@ -24,7 +24,7 @@ namespace IMGUITranslationLoader.Hook
             {
                 text = text.Substring(PREFIX_LEN);
                 return;
-            }                
+            }
 
             string pluginName = GetClosestExternalType(new StackTrace());
 
@@ -57,22 +57,6 @@ namespace IMGUITranslationLoader.Hook
             }
         }
 
-        private static string GetClosestExternalType(StackTrace trace)
-        {
-            foreach (StackFrame frame in trace.GetFrames())
-            {
-                Type t = frame.GetMethod().DeclaringType;
-                if(t == null)
-                    continue;
-                string assName = t.Assembly.GetName().Name;
-                if(assName == "IMGUITranslationLoader.Hook" || assName == "UnityEngine")
-                    continue;
-                return assName.ToLowerInvariant();
-            }
-
-            return string.Empty;
-        }
-
         public static void OnTranslateTempText()
         {
             bool textEmpty = string.IsNullOrEmpty(GUIContent.s_Text.text);
@@ -95,6 +79,22 @@ namespace IMGUITranslationLoader.Hook
                 if (!string.IsNullOrEmpty(textTp))
                     GUIContent.s_Text.tooltip = PREFIX + textTp;
             }
+        }
+
+        private static string GetClosestExternalType(StackTrace trace)
+        {
+            foreach (StackFrame frame in trace.GetFrames())
+            {
+                Type t = frame.GetMethod().DeclaringType;
+                if (t == null)
+                    continue;
+                string assName = t.Assembly.GetName().Name;
+                if (assName == "IMGUITranslationLoader.Hook" || assName == "UnityEngine")
+                    continue;
+                return assName.ToLowerInvariant();
+            }
+
+            return string.Empty;
         }
 
         private static string OnTranslate(string text, string plugin)

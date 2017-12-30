@@ -24,9 +24,9 @@ namespace IMGUITranslationLoader.Plugin.Utils
     {
         public const string TAG = "IMGUITranslationLoader";
         private static Dictionary<string, HashSet<string>> cachedDumps;
+        private static bool dumpEnabled;
         private static Dictionary<string, TextWriter> dumpStreams;
         private static bool inited;
-        private static bool dumpEnabled;
 
         public static bool DumpEnabled
         {
@@ -88,7 +88,6 @@ namespace IMGUITranslationLoader.Plugin.Utils
             }
 
             if (!dumpStreams.TryGetValue(plugin, out TextWriter tw))
-            {
                 try
                 {
                     string dumpFile = Path.Combine(DumpPath, $"{plugin}.txt");
@@ -101,7 +100,7 @@ namespace IMGUITranslationLoader.Plugin.Utils
                             if (string.IsNullOrEmpty(str) || str.StartsWith(";"))
                                 continue;
 
-                            logged.Add(str.Split(new[] { '\t' }, StringSplitOptions.RemoveEmptyEntries)[0]);
+                            logged.Add(str.Split(new[] {'\t'}, StringSplitOptions.RemoveEmptyEntries)[0]);
                         }
                     }
 
@@ -113,8 +112,7 @@ namespace IMGUITranslationLoader.Plugin.Utils
                     WriteLine(LogLevel.Error, $"Failed to create or open dump file {plugin}.txt. Exception: {e}");
                     return;
                 }
-            }
-            
+
             line = line.Replace("\n", "").Trim().Escape();
             if (logged.Contains(line))
                 return;

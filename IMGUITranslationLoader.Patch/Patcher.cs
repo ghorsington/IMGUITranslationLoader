@@ -36,8 +36,10 @@ namespace IMGUITranslationLoader.Patch
             FieldDefinition mTooltip = guiContent.GetField("m_Tooltip");
             FieldDefinition sText = guiContent.GetField("s_Text");
 
-            guiContent.GetMethods(".ctor")
-                      .ForEach(m => m.InjectWith(onTranslateTextTooltip, -1, flags: InjectFlags.PassFields, typeFields: new[] { mText, mTooltip }));
+            guiContent.GetMethods(".ctor").ForEach(m => m.InjectWith(onTranslateTextTooltip,
+                                                                     -1,
+                                                                     flags: InjectFlags.PassFields,
+                                                                     typeFields: new[] {mText, mTooltip}));
 
             sText.IsPublic = true;
             sText.IsPrivate = false;

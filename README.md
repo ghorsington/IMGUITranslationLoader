@@ -20,9 +20,11 @@ This plug-in allows to easily translate these GUIs.
 
 Yes, this plug-in is most likely not the most unique. For instance, I know of CM3D2.UnityUITranslator, but I have yet to locate it.
 I already had working core for translation loading, and modifying it to work with IMGUI was simple enough.
-That said, translating IMGUI is no easy task: the GUI is being redrawn on every tick, which makes retranslation quite costly.
-This plug-in attempts to fix the problem by caching already translated strings and bailing out of the translation as soon as possible.
 
+I decided against merging this feature into YATranslator simply because of performance factor: YATranslator has many powerful features, but there are simply too many of them to do such a simple task.
+Moreover, I'm quite sure not everyone wants to have the all-in-one package like YAT: some may simply want to translate just the IMGUI.
+
+Note that translation IMGUI comes with its own costs: consult the [FAQ](wiki/FAQ) for more info.
 
 ## Building
 

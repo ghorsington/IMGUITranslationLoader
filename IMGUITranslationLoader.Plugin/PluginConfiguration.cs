@@ -6,6 +6,7 @@ namespace IMGUITranslationLoader.Plugin
     public class PluginConfiguration
     {
         public bool Dump = false;
+
         public bool EnableStringReload = false;
 
         public bool Load = true;
