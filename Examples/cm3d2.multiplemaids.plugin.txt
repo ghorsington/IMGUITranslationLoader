@@ -1,5 +1,5 @@
 ; MultipleMaids Plugin Translation
-; Original credits: Krypto & Exkrion @ HongFire
+; Original credits: Krypto & Exkirion @ HongFire
 ;
 ; Edited for use with IMGUITranslationLoader by denikson
 ;
