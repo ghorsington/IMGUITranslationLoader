@@ -24,7 +24,7 @@ I already had working core for translation loading, and modifying it to work wit
 I decided against merging this feature into YATranslator simply because of performance factor: YATranslator has many powerful features, but there are simply too many of them to do such a simple task.
 Moreover, I'm quite sure not everyone wants to have the all-in-one package like YAT: some may simply want to translate just the IMGUI.
 
-Note that translation IMGUI comes with its own costs: consult the [FAQ](wiki/FAQ) for more info.
+Note that translation IMGUI comes with its own costs: consult the [FAQ](https://github.com/denikson/IMGUITranslationLoader/wiki/FAQ) for more info.
 
 ## Building
 
