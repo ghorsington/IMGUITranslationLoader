@@ -20,6 +20,8 @@ namespace IMGUITranslationLoader.Hook
 
         public static void OnTranslateText(ref string text)
         {
+            if(string.IsNullOrEmpty(text))
+                return;
             if (text.StartsWith(PREFIX))
             {
                 text = text.Substring(PREFIX_LEN);
