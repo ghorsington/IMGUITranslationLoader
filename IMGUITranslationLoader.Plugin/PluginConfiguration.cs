@@ -7,10 +7,10 @@ namespace IMGUITranslationLoader.Plugin
     {
         public bool Dump = false;
 
+        public bool EnableLogging = true;
+
         public bool EnableStringReload = false;
 
         public bool Load = true;
-
-        public bool Verbose = false;
     }
 }

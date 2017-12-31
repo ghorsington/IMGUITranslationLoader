@@ -49,13 +49,6 @@ namespace IMGUITranslationLoader.Plugin.Translation
 
         public TextTranslation GetTextTranslation(string plugin, string original)
         {
-            string Translate(string text, string from)
-            {
-                Logger.WriteLine($"String::'{from}'->'{text}'");
-                translatedStrings[text] = from;
-                return text;
-            }
-
             TextTranslation result = new TextTranslation {Result = TranslationResult.Ok};
 
             bool wasTranslated = translatedStrings.ContainsKey(original);
@@ -66,14 +59,14 @@ namespace IMGUITranslationLoader.Plugin.Translation
             }
             else if (wasTranslated)
             {
-                Logger.WriteLine(LogLevel.Minor, $"String::Skip {original} (is already translated)");
+                Logger.Debug(LogLevel.Minor, $"String::Skip {original} (is already translated)");
                 result.Result = TranslationResult.Translated;
                 return result;
             }
             result.Text = untranslated;
             string input = untranslated.Replace("\n", "").Trim();
 
-            Logger.WriteLine(LogLevel.Minor, $"FindString::{untranslated}");
+            Logger.Debug(LogLevel.Minor, $"FindString::{untranslated}");
 
             if (string.IsNullOrEmpty(input))
             {
@@ -82,6 +75,13 @@ namespace IMGUITranslationLoader.Plugin.Translation
             }
 
             StringTranslations translations = stringGroups.TryGetValue(plugin, out StringTranslations v) ? v : globalTranslations;
+
+            string Translate(string text, string from)
+            {
+                Logger.Debug(LogLevel.Normal, $"String::'{from}'->'{text}'");
+                translatedStrings[text] = from;
+                return text;
+            }
 
             if (translations.TryTranslate(input, out string translation))
                 result.Text = Translate(translation, untranslated);

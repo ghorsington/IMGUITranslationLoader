@@ -42,9 +42,16 @@ namespace IMGUITranslationLoader.Plugin
                     Logger.WriteLine("Reloading translations");
                     Memory.LoadTranslations();
                 }
-                // TODO: Enable live translation reloading?
-                // This is quite hard, as IMGUI renders everything immediately, and most of the objects that contain the GUI texts are removed almost instantly.
-                // Moreover, IMGUI can be reloaded quite easily (most plugins provide a key for that anyway).
+                // TODO: Enable full translation reloading?
+                /* 
+                 * This is quite hard, as IMGUI renders everything immediately, and most of the objects that contain the GUI texts are removed almost instantly.
+                 * Keeping track of all GUIContent that should be reloaded will vastly reduce the performance.
+                 * Moreover, keepig track of a GUIContent does not guarantee that it is actually being used anymore (remember that GUI refreshes almost every frame).
+                 * Testing the life cycle phase of an object is just too performance heavy for this real-time plug-in.
+                 * 
+                 * As of this writing we will just leave full translation reloading alone.
+                 * Until there's a better suggestion as to how it should be done, that is.
+                 */
                 //TranslateExisting();
             }
         }
@@ -53,7 +60,6 @@ namespace IMGUITranslationLoader.Plugin
         {
             Logger.WriteLine("Removing hooks");
             TranslationHooks.TranslateText -= OnTranslateString;
-
             Logger.Dispose();
         }
 
@@ -64,7 +70,7 @@ namespace IMGUITranslationLoader.Plugin
             Memory.CanLoad = Settings.Load;
             Memory.RetranslateText = Settings.EnableStringReload;
             Logger.DumpPath = Path.Combine(DataPath, "IMGUITranslationDumps");
-            Logger.Enabled = Settings.Verbose;
+            Logger.Enabled = Settings.EnableLogging;
             Logger.DumpEnabled = Settings.Dump;
         }
 

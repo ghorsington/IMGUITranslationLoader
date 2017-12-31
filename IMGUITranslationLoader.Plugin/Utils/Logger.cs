@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using UnityInjector.ConsoleUtil;
 
@@ -122,6 +123,15 @@ namespace IMGUITranslationLoader.Plugin.Utils
                 tw.WriteLine(line);
                 tw.Flush();
             }
+        }
+
+        [Conditional("DEBUG")]
+        public static void Debug(LogLevel logLevel, string message)
+        {
+            ConsoleColor oldColor = SafeConsole.ForegroundColor;
+            SafeConsole.ForegroundColor = logLevel.Color;
+            Console.WriteLine($"{TAG}::{message}");
+            SafeConsole.ForegroundColor = oldColor;
         }
 
         public static void WriteLine(LogLevel logLevel, string message)

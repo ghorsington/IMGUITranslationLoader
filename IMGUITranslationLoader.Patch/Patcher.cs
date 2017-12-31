@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Inject;
@@ -45,10 +44,15 @@ namespace IMGUITranslationLoader.Patch
             sText.IsPrivate = false;
             guiContent.GetMethods("Temp").Where(m => m.Parameters.Any(p => p.ParameterType.FullName == "System.String"))
                       .ForEach(m => m.InjectWith(onTranslateTempText, -1));
-            Console.WriteLine("Set text");
+
+            mText.IsPublic = true;
+            mText.IsPrivate = false;
             guiContent.GetMethod("set_text").InjectWith(onTranslateText, flags: InjectFlags.PassParametersRef);
-            Console.WriteLine("Set tooltip");
+
+            mTooltip.IsPublic = true;
+            mTooltip.IsPrivate = false;
             guiContent.GetMethod("set_tooltip").InjectWith(onTranslateText, flags: InjectFlags.PassParametersRef);
+
             SetPatchedAttribute(args.Assembly, TAG);
         }
 

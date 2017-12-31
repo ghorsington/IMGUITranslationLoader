@@ -20,15 +20,17 @@ namespace IMGUITranslationLoader.Hook
 
         public static void OnTranslateText(ref string text)
         {
-            if(string.IsNullOrEmpty(text))
+            if (string.IsNullOrEmpty(text))
                 return;
-            if (text.StartsWith(PREFIX))
-            {
-                text = text.Substring(PREFIX_LEN);
-                return;
-            }
 
-            string pluginName = GetClosestExternalType(new StackTrace());
+            StackFrame frame = new StackFrame(2);
+            StackTrace trace = new StackTrace(frame);
+            Type t = frame.GetMethod().DeclaringType;
+            if (t == null)
+                return;
+            string pluginName = t.Assembly.GetName().Name.ToLowerInvariant();
+            if (pluginName == "unityengine") // Most likely we're in TextEditor; Ignore the call in that case.
+                return;
 
             string translation = OnTranslate(text, pluginName);
             if (!string.IsNullOrEmpty(translation))
@@ -42,7 +44,12 @@ namespace IMGUITranslationLoader.Hook
             if (textEmpty && tooltipEmpty)
                 return;
 
-            string pluginName = GetClosestExternalType(new StackTrace());
+            StackFrame frame = new StackFrame(2);
+            StackTrace trace = new StackTrace(frame);
+            Type t = frame.GetMethod().DeclaringType;
+            if (t == null)
+                return;
+            string pluginName = t.Assembly.GetName().Name.ToLowerInvariant();
 
             if (!textEmpty)
             {
@@ -61,42 +68,31 @@ namespace IMGUITranslationLoader.Hook
 
         public static void OnTranslateTempText()
         {
-            bool textEmpty = string.IsNullOrEmpty(GUIContent.s_Text.text);
-            bool tooltipEmpty = string.IsNullOrEmpty(GUIContent.s_Text.tooltip);
+            bool textEmpty = string.IsNullOrEmpty(GUIContent.s_Text.m_Text);
+            bool tooltipEmpty = string.IsNullOrEmpty(GUIContent.s_Text.m_Tooltip);
             if (textEmpty && tooltipEmpty)
                 return;
 
-            string pluginName = GetClosestExternalType(new StackTrace());
+            StackFrame frame = new StackFrame(3); // Since Temp is called indirectly by UnityEngine, the original plugin is one frame lower
+            StackTrace trace = new StackTrace(frame);
+            Type t = frame.GetMethod().DeclaringType;
+            if (t == null)
+                return;
+            string pluginName = t.Assembly.GetName().Name.ToLowerInvariant();
 
             if (!textEmpty)
             {
-                string textTr = OnTranslate(GUIContent.s_Text.text, pluginName);
+                string textTr = OnTranslate(GUIContent.s_Text.m_Text, pluginName);
                 if (!string.IsNullOrEmpty(textTr))
-                    GUIContent.s_Text.text = PREFIX + textTr;
+                    GUIContent.s_Text.m_Text = textTr;
             }
 
             if (!tooltipEmpty)
             {
-                string textTp = OnTranslate(GUIContent.s_Text.tooltip, pluginName);
+                string textTp = OnTranslate(GUIContent.s_Text.m_Tooltip, pluginName);
                 if (!string.IsNullOrEmpty(textTp))
-                    GUIContent.s_Text.tooltip = PREFIX + textTp;
+                    GUIContent.s_Text.m_Tooltip = textTp;
             }
-        }
-
-        private static string GetClosestExternalType(StackTrace trace)
-        {
-            foreach (StackFrame frame in trace.GetFrames())
-            {
-                Type t = frame.GetMethod().DeclaringType;
-                if (t == null)
-                    continue;
-                string assName = t.Assembly.GetName().Name;
-                if (assName == "IMGUITranslationLoader.Hook" || assName == "UnityEngine")
-                    continue;
-                return assName.ToLowerInvariant();
-            }
-
-            return string.Empty;
         }
 
         private static string OnTranslate(string text, string plugin)

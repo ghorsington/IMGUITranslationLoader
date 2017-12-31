@@ -41,7 +41,12 @@ namespace IMGUITranslationLoader.Sybaris.Patcher
             guiContent.GetMethods("Temp").Where(m => m.Parameters.Any(p => p.ParameterType.FullName == "System.String"))
                       .ForEach(m => m.InjectWith(onTranslateTempText, -1));
 
+            mText.IsPublic = true;
+            mText.IsPrivate = false;
             guiContent.GetMethod("set_text").InjectWith(onTranslateText, flags: InjectFlags.PassParametersRef);
+
+            mTooltip.IsPublic = true;
+            mTooltip.IsPrivate = false;
             guiContent.GetMethod("set_tooltip").InjectWith(onTranslateText, flags: InjectFlags.PassParametersRef);
         }
     }
