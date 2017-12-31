@@ -26,7 +26,7 @@ namespace IMGUITranslationLoader.Plugin
 
             Memory.LoadTranslations();
 
-            TranslationHooks.TranslateText += OnTranslateString;
+            TranslationHooks.Translate = Translate;
             Logger.WriteLine("Hooking complete");
         }
 
@@ -58,8 +58,6 @@ namespace IMGUITranslationLoader.Plugin
 
         public void OnDestroy()
         {
-            Logger.WriteLine("Removing hooks");
-            TranslationHooks.TranslateText -= OnTranslateString;
             Logger.Dispose();
         }
 
@@ -67,28 +65,22 @@ namespace IMGUITranslationLoader.Plugin
         {
             Settings = ConfigurationLoader.LoadConfig<PluginConfiguration>(Preferences);
             SaveConfig();
+            TranslationHooks.GlobalMode = Settings.GlobalMode;
+            Memory.GlobalMode = Settings.GlobalMode;
             Memory.CanLoad = Settings.Load;
             Memory.RetranslateText = Settings.EnableStringReload;
             Logger.DumpPath = Path.Combine(DataPath, "IMGUITranslationDumps");
+            Logger.GlobalMode = Settings.GlobalMode;
             Logger.Enabled = Settings.EnableLogging;
             Logger.DumpEnabled = Settings.Dump;
         }
 
-        private void OnTranslateString(object sender, StringTranslationEventArgs e)
+        private string Translate(string pluginName, string input)
         {
-            string inputText = e.Text;
-            if (string.IsNullOrEmpty(inputText))
-                return;
-
-            TextTranslation translation = Memory.GetTextTranslation(e.PluginName, inputText);
-
-            if (translation.Result == TranslationResult.Ok || translation.Result == TranslationResult.NotFound)
-                e.Translation = translation.Text;
-
-            if (translation.Result == TranslationResult.Translated)
-                return;
-
-            Logger.DumpLine(inputText, e.PluginName);
+            string translation = Memory.GetTextTranslation(pluginName, input);
+            if (Settings.Dump && input == translation)
+                Logger.DumpLine(input, pluginName);
+            return translation;
         }
     }
 }

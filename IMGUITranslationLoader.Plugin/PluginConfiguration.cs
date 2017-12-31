@@ -11,6 +11,8 @@ namespace IMGUITranslationLoader.Plugin
 
         public bool EnableStringReload = false;
 
+        public bool GlobalMode = false;
+
         public bool Load = true;
     }
 }

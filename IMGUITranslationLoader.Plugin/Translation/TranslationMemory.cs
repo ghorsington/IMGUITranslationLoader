@@ -7,8 +7,13 @@ namespace IMGUITranslationLoader.Plugin.Translation
 {
     public class TranslationMemory
     {
-        private static readonly int[] NoLevels = new int[0];
         private const string STRINGS_FOLDER = "IMGUIStrings";
+
+        public bool CanLoad;
+
+        public bool GlobalMode;
+
+        public bool RetranslateText;
 
         private readonly StringTranslations globalTranslations;
 
@@ -25,10 +30,6 @@ namespace IMGUITranslationLoader.Plugin.Translation
             stringGroups = new Dictionary<string, StringTranslations>();
             globalTranslations = new StringTranslations("global");
         }
-
-        public bool CanLoad { get; set; }
-
-        public bool RetranslateText { get; set; }
 
         public string TranslationsPath
         {
@@ -47,48 +48,32 @@ namespace IMGUITranslationLoader.Plugin.Translation
                 LoadStringTranslations();
         }
 
-        public TextTranslation GetTextTranslation(string plugin, string original)
+        public string GetTextTranslation(string plugin, string original)
         {
-            TextTranslation result = new TextTranslation {Result = TranslationResult.Ok};
+            StringTranslations translations = null;
+            if (!GlobalMode && !stringGroups.TryGetValue(plugin, out translations))
+                return original;
+            if (GlobalMode)
+                translations = globalTranslations;
 
             bool wasTranslated = translatedStrings.ContainsKey(original);
-            string untranslated = original;
+            string input = original;
             if (RetranslateText)
             {
-                untranslated = wasTranslated ? translatedStrings[untranslated] : untranslated;
+                input = wasTranslated ? translatedStrings[input] : input;
             }
             else if (wasTranslated)
             {
                 Logger.Debug(LogLevel.Minor, $"String::Skip {original} (is already translated)");
-                result.Result = TranslationResult.Translated;
-                return result;
-            }
-            result.Text = untranslated;
-            string input = untranslated.Replace("\n", "").Trim();
-
-            Logger.Debug(LogLevel.Minor, $"FindString::{untranslated}");
-
-            if (string.IsNullOrEmpty(input))
-            {
-                result.Result = TranslationResult.NotFound;
-                return result;
+                return original;
             }
 
-            StringTranslations translations = stringGroups.TryGetValue(plugin, out StringTranslations v) ? v : globalTranslations;
+            Logger.Debug(LogLevel.Minor, $"FindString::{input.Escape()}");
 
-            string Translate(string text, string from)
-            {
-                Logger.Debug(LogLevel.Normal, $"String::'{from}'->'{text}'");
-                translatedStrings[text] = from;
-                return text;
-            }
-
-            if (translations.TryTranslate(input, out string translation))
-                result.Text = Translate(translation, untranslated);
-            else
-                result.Result = TranslationResult.NotFound;
-
-            return result;
+            if (!translations.TryTranslate(input, out string translation))
+                return input;
+            translatedStrings[translation] = input;
+            return translation;
         }
 
         public bool TryGetOriginal(string translation, out string original)
@@ -137,7 +122,7 @@ namespace IMGUITranslationLoader.Plugin.Translation
 
                 Logger.WriteLine($"CacheString::'{fileName}");
 
-                if (fileName == "global")
+                if (GlobalMode)
                 {
                     globalTranslations.AddTranslationFile(translationPath);
                     loadedFiles++;

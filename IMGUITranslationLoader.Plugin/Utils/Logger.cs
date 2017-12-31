@@ -23,6 +23,7 @@ namespace IMGUITranslationLoader.Plugin.Utils
 
     public static class Logger
     {
+        public static bool GlobalMode;
         public const string TAG = "IMGUITranslationLoader";
         private static Dictionary<string, HashSet<string>> cachedDumps;
         private static bool dumpEnabled;
@@ -82,6 +83,11 @@ namespace IMGUITranslationLoader.Plugin.Utils
         {
             if (!InitDump())
                 return;
+            if (GlobalMode)
+            {
+                WriteLine(LogLevel.Warning, "Cannot dump lines while GlobalMode is enabled!");
+                return;
+            }
             if (!cachedDumps.TryGetValue(plugin, out HashSet<string> logged))
             {
                 logged = new HashSet<string>();
@@ -114,7 +120,7 @@ namespace IMGUITranslationLoader.Plugin.Utils
                     return;
                 }
 
-            line = line.Replace("\n", "").Trim().Escape();
+            line = line.Escape();
             if (logged.Contains(line))
                 return;
             logged.Add(line);

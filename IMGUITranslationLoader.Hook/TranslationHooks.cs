@@ -14,27 +14,31 @@ namespace IMGUITranslationLoader.Hook
 
     public class TranslationHooks
     {
-        private const string PREFIX = "\u200B";
-        private static readonly int PREFIX_LEN = PREFIX.Length;
-        public static event EventHandler<StringTranslationEventArgs> TranslateText;
+        public delegate string Translator(string pluginName, string inputText);
+
+        public static bool GlobalMode = false;
+        public static Translator Translate;
 
         public static void OnTranslateText(ref string text)
         {
             if (string.IsNullOrEmpty(text))
                 return;
 
-            StackFrame frame = new StackFrame(2);
-            StackTrace trace = new StackTrace(frame);
-            Type t = frame.GetMethod().DeclaringType;
-            if (t == null)
-                return;
-            string pluginName = t.Assembly.GetName().Name.ToLowerInvariant();
-            if (pluginName == "unityengine") // Most likely we're in TextEditor; Ignore the call in that case.
-                return;
+            string pluginName = null;
 
-            string translation = OnTranslate(text, pluginName);
-            if (!string.IsNullOrEmpty(translation))
-                text = translation;
+            if (!GlobalMode)
+            {
+                StackFrame frame = new StackFrame(2);
+                StackTrace trace = new StackTrace(frame);
+                Type t = frame.GetMethod().DeclaringType;
+                if (t == null)
+                    return;
+                pluginName = t.Assembly.GetName().Name.ToLowerInvariant();
+                if (pluginName == "unityengine") // Most likely we're in TextEditor; Ignore the call in that case.
+                    return;
+            }
+
+            text = Translate?.Invoke(pluginName, text);
         }
 
         public static void OnTranslateTextTooltip(ref string text, ref string tooltip)
@@ -44,26 +48,34 @@ namespace IMGUITranslationLoader.Hook
             if (textEmpty && tooltipEmpty)
                 return;
 
-            StackFrame frame = new StackFrame(2);
-            StackTrace trace = new StackTrace(frame);
-            Type t = frame.GetMethod().DeclaringType;
-            if (t == null)
-                return;
-            string pluginName = t.Assembly.GetName().Name.ToLowerInvariant();
+            string pluginName = null;
+
+            if (!GlobalMode)
+            {
+                StackFrame frame = new StackFrame(2);
+                StackTrace trace = new StackTrace(frame);
+                Type t = frame.GetMethod().DeclaringType;
+                if (t == null)
+                    return;
+                pluginName = t.Assembly.GetName().Name.ToLowerInvariant();
+                if (pluginName == "unityengine") // Some dropdowns are created with Temp(string[])
+                {
+                    // Creat a new stack frame an trace it
+                    // Copy-paste to reduce additional frames
+                    StackFrame frame2 = new StackFrame(4);
+                    StackTrace trace2 = new StackTrace(frame2);
+                    Type tt = frame2.GetMethod().DeclaringType;
+                    if (tt == null)
+                        return;
+                    pluginName = tt.Assembly.GetName().Name.ToLowerInvariant();
+                }
+            }
 
             if (!textEmpty)
-            {
-                string textTr = OnTranslate(text, pluginName);
-                if (!string.IsNullOrEmpty(textTr))
-                    text = textTr;
-            }
+                text = Translate?.Invoke(pluginName, text);
 
             if (!tooltipEmpty)
-            {
-                string textTp = OnTranslate(tooltip, pluginName);
-                if (!string.IsNullOrEmpty(textTp))
-                    tooltip = textTp;
-            }
+                tooltip = Translate?.Invoke(pluginName, text);
         }
 
         public static void OnTranslateTempText()
@@ -73,35 +85,24 @@ namespace IMGUITranslationLoader.Hook
             if (textEmpty && tooltipEmpty)
                 return;
 
-            StackFrame frame = new StackFrame(3); // Since Temp is called indirectly by UnityEngine, the original plugin is one frame lower
-            StackTrace trace = new StackTrace(frame);
-            Type t = frame.GetMethod().DeclaringType;
-            if (t == null)
-                return;
-            string pluginName = t.Assembly.GetName().Name.ToLowerInvariant();
+            string pluginName = null;
+
+            if (!GlobalMode)
+            {
+                StackFrame
+                        frame = new StackFrame(3); // Since Temp is called indirectly by UnityEngine, the original plugin is one frame lower
+                StackTrace trace = new StackTrace(frame);
+                Type t = frame.GetMethod().DeclaringType;
+                if (t == null)
+                    return;
+                pluginName = t.Assembly.GetName().Name.ToLowerInvariant();
+            }
 
             if (!textEmpty)
-            {
-                string textTr = OnTranslate(GUIContent.s_Text.m_Text, pluginName);
-                if (!string.IsNullOrEmpty(textTr))
-                    GUIContent.s_Text.m_Text = textTr;
-            }
+                GUIContent.s_Text.m_Text = Translate?.Invoke(pluginName, GUIContent.s_Text.m_Text);
 
             if (!tooltipEmpty)
-            {
-                string textTp = OnTranslate(GUIContent.s_Text.m_Tooltip, pluginName);
-                if (!string.IsNullOrEmpty(textTp))
-                    GUIContent.s_Text.m_Tooltip = textTp;
-            }
-        }
-
-        private static string OnTranslate(string text, string plugin)
-        {
-            StringTranslationEventArgs args = new StringTranslationEventArgs {PluginName = plugin, Text = text};
-
-            TranslateText?.Invoke(null, args);
-
-            return args.Translation;
+                GUIContent.s_Text.m_Tooltip = Translate?.Invoke(pluginName, GUIContent.s_Text.m_Tooltip);
         }
     }
 }
