@@ -15,6 +15,8 @@ This plug-in allows to easily translate these GUIs.
 * Translates GUIs on by-assembly basis
 * Support for RegExes
 * Supports dumping original strings
+* Performance overhead as low as possible
+* Two translation modes: by-plugin and global
 
 ## Motivation
 
