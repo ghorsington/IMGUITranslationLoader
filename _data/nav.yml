@@ -1,0 +1,6 @@
+- name: "Projects"
+  items:
+    - name: "Yet Another Translator"
+      href: "/CM3D2.YATranslator"
+    - name: "IMGUI Translation Loader"
+      href: "/IMGUITranslationLoader"
