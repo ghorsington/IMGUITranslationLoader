@@ -1,1 +1,15 @@
-<video autoplay="true" loop="true" src="assets/preview.webm" style="height: 400px; border-radius: 2px;"></video>
+<style>
+    #preview-video {
+        height: 400px;
+        border-radius: 2px;
+    }
+
+    @media (max-width: 450px) {
+        #preview-video {
+            height: auto;
+            width: 90vw;
+        }
+    }
+</style>
+
+<video id="preview-video" autoplay="true" loop="true" src="assets/preview.webm"></video>
