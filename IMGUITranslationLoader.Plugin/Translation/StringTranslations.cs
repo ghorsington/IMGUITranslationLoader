@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using IMGUITranslationLoader.Plugin.Utils;
@@ -68,12 +67,14 @@ namespace IMGUITranslationLoader.Plugin.Translation
 
         private bool LoadFromFile(string filePath)
         {
-            IEnumerable<string> translationLines = File
-                    .ReadAllLines(filePath, Encoding.UTF8).Select(m => m.Trim())
-                    .Where(m => !m.StartsWith(";", StringComparison.CurrentCulture));
+            IEnumerable<string> translationLines = File.ReadAllLines(filePath, Encoding.UTF8);
             int translated = 0;
             foreach (string translationLine in translationLines)
             {
+                string line = translationLine.Trim();
+                if (line.Length == 0 || line.StartsWith(";", StringComparison.InvariantCulture))
+                    continue;
+
                 string[] textParts = translationLine.Split(new[] {'\t'}, StringSplitOptions.RemoveEmptyEntries);
                 if (textParts.Length < 2)
                     continue;
@@ -84,7 +85,8 @@ namespace IMGUITranslationLoader.Plugin.Translation
 
                 if (original.StartsWith("$", StringComparison.CurrentCulture))
                 {
-                    loadedRegexTranslations.AddIfNotPresent(new Regex(original.Substring(1), RegexOptions.Compiled), translation);
+                    loadedRegexTranslations.AddIfNotPresent(new Regex(original.Substring(1), RegexOptions.Compiled),
+                                                            translation);
                     translated++;
                 }
                 else

@@ -6,10 +6,8 @@ namespace IMGUITranslationLoader.Plugin.Utils
 {
     public static class Extensions
     {
-        public static T ParseEnum<T>(string value, bool ignoreCase = false)
-        {
-            return (T) Enum.Parse(typeof(T), value, ignoreCase);
-        }
+        public static T ParseEnum<T>(string value, bool ignoreCase = false) =>
+                (T) Enum.Parse(typeof(T), value, ignoreCase);
 
         public static void AddIfNotPresent<TKey, TValue>(this IDictionary<TKey, TValue> self, TKey key, TValue value)
         {

@@ -9,18 +9,18 @@ namespace IMGUITranslationLoader.Plugin.Translation
     {
         private const string STRINGS_FOLDER = "IMGUIStrings";
 
+        private readonly StringTranslations globalTranslations;
+        private readonly Dictionary<string, StringTranslations> stringGroups;
+        private readonly Dictionary<string, string> translatedStrings;
+
         public bool CanLoad;
 
         public bool GlobalMode;
 
         public bool RetranslateText;
 
-        private readonly StringTranslations globalTranslations;
-
         private bool isDirectoriesChecked;
-        private readonly Dictionary<string, StringTranslations> stringGroups;
         private string stringsPath;
-        private readonly Dictionary<string, string> translatedStrings;
         private string translationsPath;
 
         public TranslationMemory(string translationPath)
@@ -59,9 +59,7 @@ namespace IMGUITranslationLoader.Plugin.Translation
             bool wasTranslated = translatedStrings.ContainsKey(original);
             string input = original;
             if (RetranslateText)
-            {
                 input = wasTranslated ? translatedStrings[input] : input;
-            }
             else if (wasTranslated)
             {
                 Logger.Debug(LogLevel.Minor, $"String::Skip {original} (is already translated)");
@@ -76,15 +74,10 @@ namespace IMGUITranslationLoader.Plugin.Translation
             return translation;
         }
 
-        public bool TryGetOriginal(string translation, out string original)
-        {
-            return translatedStrings.TryGetValue(translation, out original);
-        }
+        public bool TryGetOriginal(string translation, out string original) =>
+                translatedStrings.TryGetValue(translation, out original);
 
-        public bool WasTranslated(string translation)
-        {
-            return translatedStrings.ContainsKey(translation);
-        }
+        public bool WasTranslated(string translation) => translatedStrings.ContainsKey(translation);
 
         private void CheckDirectories()
         {

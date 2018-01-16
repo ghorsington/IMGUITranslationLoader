@@ -30,7 +30,8 @@ namespace IMGUITranslationLoader.Plugin.Utils
         {
             Type configType = configObject.GetType();
 
-            IEnumerable<FieldInfo> fields = configType.GetFields(BindingFlags.Public | BindingFlags.Instance).Where(f => !f.IsInitOnly);
+            IEnumerable<FieldInfo> fields =
+                    configType.GetFields(BindingFlags.Public | BindingFlags.Instance).Where(f => !f.IsInitOnly);
             IEnumerable<PropertyInfo> properties = configType
                     .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                     .Where(p => p.GetGetMethod() != null && p.GetSetMethod() != null);
@@ -83,7 +84,9 @@ namespace IMGUITranslationLoader.Plugin.Utils
 
                 try
                 {
-                    property.SetValue(configObject, Convert.ChangeType(section[propertyName].Value, property.PropertyType), null);
+                    property.SetValue(configObject,
+                                      Convert.ChangeType(section[propertyName].Value, property.PropertyType),
+                                      null);
                 }
                 catch (Exception)
                 {

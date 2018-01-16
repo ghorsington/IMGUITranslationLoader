@@ -62,12 +62,25 @@ namespace IMGUITranslationLoader.Hook
                 {
                     // Creat a new stack frame an trace it
                     // Copy-paste to reduce additional frames
-                    StackFrame frame2 = new StackFrame(4);
-                    StackTrace trace2 = new StackTrace(frame2);
-                    Type tt = frame2.GetMethod().DeclaringType;
-                    if (tt == null)
+                    frame = new StackFrame(4);
+                    trace = new StackTrace(frame);
+                    t = frame.GetMethod().DeclaringType;
+                    if (t == null)
                         return;
-                    pluginName = tt.Assembly.GetName().Name.ToLowerInvariant();
+                    pluginName = t.Assembly.GetName().Name.ToLowerInvariant();
+
+                    //if (pluginName == "unityengine") // Okay, give up here and walk down the full stack
+                    //{
+                    //    trace = new StackTrace();
+                    //    foreach (StackFrame sFrame in trace.GetFrames())
+                    //    {
+                    //        Type decType = sFrame.GetMethod().DeclaringType;
+                    //        if (decType.Namespace == "UnityEngine")
+                    //            continue;
+                    //        pluginName = decType.Assembly.GetName().Name.ToLowerInvariant();
+                    //        break;
+                    //    }
+                    //}
                 }
             }
 
@@ -90,7 +103,8 @@ namespace IMGUITranslationLoader.Hook
             if (!GlobalMode)
             {
                 StackFrame
-                        frame = new StackFrame(3); // Since Temp is called indirectly by UnityEngine, the original plugin is one frame lower
+                        frame =
+                                new StackFrame(3); // Since Temp is called indirectly by UnityEngine, the original plugin is one frame lower
                 StackTrace trace = new StackTrace(frame);
                 Type t = frame.GetMethod().DeclaringType;
                 if (t == null)

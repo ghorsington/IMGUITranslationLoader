@@ -16,10 +16,8 @@ namespace IMGUITranslationLoader.Patch
 
         private static AssemblyDefinition HookAssembly { get; set; }
 
-        public override bool CanPatch(PatcherArguments args)
-        {
-            return args.Assembly.Name.Name == "UnityEngine" && !HasAttribute(args.Assembly, TAG);
-        }
+        public override bool CanPatch(PatcherArguments args) =>
+                args.Assembly.Name.Name == "UnityEngine" && !HasAttribute(args.Assembly, TAG);
 
         public override void Patch(PatcherArguments args)
         {
