@@ -11,12 +11,10 @@ namespace IMGUITranslationLoader.Sybaris.Patcher
         public static readonly string[] TargetAssemblyNames = {"UnityEngine.dll"};
         private const string HOOK_NAME = "IMGUITranslationLoader.Hook";
 
-        private const string SYBARIS_MANAGED_DIR = @"..\Plugins\Managed";
-
         public static void Patch(AssemblyDefinition assembly)
         {
             string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string hookDir = $"{SYBARIS_MANAGED_DIR}\\{HOOK_NAME}.dll";
+            string hookDir = $"{HOOK_NAME}.dll";
             AssemblyDefinition hookAssembly = AssemblyLoader.LoadAssembly(Path.Combine(assemblyDir, hookDir));
 
             TypeDefinition guiContent = assembly.MainModule.GetType("UnityEngine.GUIContent");
