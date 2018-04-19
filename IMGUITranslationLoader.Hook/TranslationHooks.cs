@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Reflection;
 using UnityEngine;
 
 namespace IMGUITranslationLoader.Hook
@@ -30,9 +31,10 @@ namespace IMGUITranslationLoader.Hook
             {
                 StackFrame frame = new StackFrame(2);
                 StackTrace trace = new StackTrace(frame);
-                Type t = frame.GetMethod().DeclaringType;
-                if (t == null)
+                MethodBase method = frame.GetMethod();
+                if (method == null)
                     return;
+                Type t = method.DeclaringType;
                 pluginName = t.Assembly.GetName().Name.ToLowerInvariant();
                 if (pluginName == "unityengine") // Most likely we're in TextEditor; Ignore the call in that case.
                     return;
@@ -54,9 +56,10 @@ namespace IMGUITranslationLoader.Hook
             {
                 StackFrame frame = new StackFrame(2);
                 StackTrace trace = new StackTrace(frame);
-                Type t = frame.GetMethod().DeclaringType;
-                if (t == null)
+                MethodBase method = frame.GetMethod();
+                if (method == null)
                     return;
+                Type t = method.DeclaringType;
                 pluginName = t.Assembly.GetName().Name.ToLowerInvariant();
                 if (pluginName == "unityengine") // Some dropdowns are created with Temp(string[])
                 {
@@ -64,9 +67,10 @@ namespace IMGUITranslationLoader.Hook
                     // Copy-paste to reduce additional frames
                     frame = new StackFrame(4);
                     trace = new StackTrace(frame);
-                    t = frame.GetMethod().DeclaringType;
-                    if (t == null)
+                    method = frame.GetMethod();
+                    if (method == null)
                         return;
+                    t = method.DeclaringType;
                     pluginName = t.Assembly.GetName().Name.ToLowerInvariant();
 
                     //if (pluginName == "unityengine") // Okay, give up here and walk down the full stack
@@ -106,9 +110,10 @@ namespace IMGUITranslationLoader.Hook
                         frame =
                                 new StackFrame(3); // Since Temp is called indirectly by UnityEngine, the original plugin is one frame lower
                 StackTrace trace = new StackTrace(frame);
-                Type t = frame.GetMethod().DeclaringType;
-                if (t == null)
+                MethodBase method = frame.GetMethod();
+                if (method == null)
                     return;
+                Type t = method.DeclaringType;
                 pluginName = t.Assembly.GetName().Name.ToLowerInvariant();
             }
 
