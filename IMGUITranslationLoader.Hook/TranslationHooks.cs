@@ -5,23 +5,18 @@ using UnityEngine;
 
 namespace IMGUITranslationLoader.Hook
 {
-    public class StringTranslationEventArgs : EventArgs
-    {
-        public string PluginName { get; internal set; }
-        public string Text { get; internal set; }
-
-        public string Translation { get; set; }
-    }
-
     public class TranslationHooks
     {
         public delegate string Translator(string pluginName, string inputText);
 
         public static bool GlobalMode = false;
+        public static bool InsideContentCtor;
         public static Translator Translate;
 
         public static void OnTranslateText(ref string text)
         {
+            if (Translate == null)
+                return;
             if (string.IsNullOrEmpty(text))
                 return;
 
@@ -29,8 +24,8 @@ namespace IMGUITranslationLoader.Hook
 
             if (!GlobalMode)
             {
-                StackFrame frame = new StackFrame(2);
-                StackTrace trace = new StackTrace(frame);
+                var frame = new StackFrame(2);
+                var trace = new StackTrace(frame);
                 MethodBase method = frame.GetMethod();
                 if (method == null)
                     return;
@@ -40,11 +35,41 @@ namespace IMGUITranslationLoader.Hook
                     return;
             }
 
-            text = Translate?.Invoke(pluginName, text);
+            text = Translate.Invoke(pluginName, text);
+        }
+
+        public static void OnTranslateTextMany(ref string[] texts)
+        {
+            if (Translate == null)
+                return;
+            string pluginName = null;
+
+            if (!GlobalMode)
+            {
+                var frame = new StackFrame(2);
+                var trace = new StackTrace(frame);
+                MethodBase method = frame.GetMethod();
+                if (method == null)
+                    return;
+                Type t = method.DeclaringType;
+                pluginName = t.Assembly.GetName().Name.ToLowerInvariant();
+                if (pluginName == "unityengine") // Most likely we're in TextEditor; Ignore the call in that case.
+                    return;
+            }
+
+            for (int i = 0; i < texts.Length; i++)
+            {
+                string text = texts[i];
+                if (string.IsNullOrEmpty(text))
+                    continue;
+                texts[i] = Translate?.Invoke(pluginName, text);
+            }
         }
 
         public static void OnTranslateTextTooltip(ref string text, ref string tooltip)
         {
+            InsideContentCtor = false;
+
             bool textEmpty = string.IsNullOrEmpty(text);
             bool tooltipEmpty = string.IsNullOrEmpty(tooltip);
             if (textEmpty && tooltipEmpty)
@@ -54,74 +79,37 @@ namespace IMGUITranslationLoader.Hook
 
             if (!GlobalMode)
             {
-                StackFrame frame = new StackFrame(2);
-                StackTrace trace = new StackTrace(frame);
+                var frame = new StackFrame(2);
+                var trace = new StackTrace(frame);
                 MethodBase method = frame.GetMethod();
                 if (method == null)
                     return;
                 Type t = method.DeclaringType;
                 pluginName = t.Assembly.GetName().Name.ToLowerInvariant();
-                if (pluginName == "unityengine") // Some dropdowns are created with Temp(string[])
+                if (pluginName == "unityengine")
                 {
-                    // Creat a new stack frame an trace it
-                    // Copy-paste to reduce additional frames
-                    frame = new StackFrame(4);
+                    frame = new StackFrame(3);
                     trace = new StackTrace(frame);
                     method = frame.GetMethod();
                     if (method == null)
                         return;
                     t = method.DeclaringType;
                     pluginName = t.Assembly.GetName().Name.ToLowerInvariant();
-
-                    //if (pluginName == "unityengine") // Okay, give up here and walk down the full stack
-                    //{
-                    //    trace = new StackTrace();
-                    //    foreach (StackFrame sFrame in trace.GetFrames())
-                    //    {
-                    //        Type decType = sFrame.GetMethod().DeclaringType;
-                    //        if (decType.Namespace == "UnityEngine")
-                    //            continue;
-                    //        pluginName = decType.Assembly.GetName().Name.ToLowerInvariant();
-                    //        break;
-                    //    }
-                    //}
                 }
             }
 
-            if (!textEmpty)
-                text = Translate?.Invoke(pluginName, text);
+            if (!textEmpty && Translate != null)
+                text = Translate.Invoke(pluginName, text);
 
-            if (!tooltipEmpty)
-                tooltip = Translate?.Invoke(pluginName, text);
+            if (!tooltipEmpty && Translate != null)
+                tooltip = Translate.Invoke(pluginName, text);
         }
 
-        public static void OnTranslateTempText()
+        public static void OnTranslateGuiContent(ref string text)
         {
-            bool textEmpty = string.IsNullOrEmpty(GUIContent.s_Text.m_Text);
-            bool tooltipEmpty = string.IsNullOrEmpty(GUIContent.s_Text.m_Tooltip);
-            if (textEmpty && tooltipEmpty)
+            if (InsideContentCtor)
                 return;
-
-            string pluginName = null;
-
-            if (!GlobalMode)
-            {
-                StackFrame
-                        frame =
-                                new StackFrame(3); // Since Temp is called indirectly by UnityEngine, the original plugin is one frame lower
-                StackTrace trace = new StackTrace(frame);
-                MethodBase method = frame.GetMethod();
-                if (method == null)
-                    return;
-                Type t = method.DeclaringType;
-                pluginName = t.Assembly.GetName().Name.ToLowerInvariant();
-            }
-
-            if (!textEmpty)
-                GUIContent.s_Text.m_Text = Translate?.Invoke(pluginName, GUIContent.s_Text.m_Text);
-
-            if (!tooltipEmpty)
-                GUIContent.s_Text.m_Tooltip = Translate?.Invoke(pluginName, GUIContent.s_Text.m_Tooltip);
+            OnTranslateText(ref text);
         }
     }
 }

@@ -50,11 +50,12 @@ namespace IMGUITranslationLoader.Plugin.Translation
 
         public string GetTextTranslation(string plugin, string original)
         {
-            StringTranslations translations = null;
-            if (!GlobalMode && !stringGroups.TryGetValue(plugin, out translations))
-                return original;
+            StringTranslations translations;
+
             if (GlobalMode)
                 translations = globalTranslations;
+            else if (!stringGroups.TryGetValue(plugin, out translations))
+                return original;
 
             bool wasTranslated = translatedStrings.ContainsKey(original);
             string input = original;
