@@ -4,6 +4,7 @@ using System.Reflection;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Inject;
+using MethodAttributes = Mono.Cecil.MethodAttributes;
 using MethodBody = Mono.Cecil.Cil.MethodBody;
 
 namespace IMGUITranslationLoader.Sybaris.Patcher
@@ -11,7 +12,7 @@ namespace IMGUITranslationLoader.Sybaris.Patcher
     public static class Patcher
     {
         public static readonly string[] TargetAssemblyNames = {"UnityEngine.dll"};
-        private const string HOOK_NAME = "IMGUITranslationLoader.Hook";
+        private const string HOOK_NAME = "IMGUITranslationLoader.Managed";
 
         public static void Patch(AssemblyDefinition assembly)
         {
@@ -21,7 +22,7 @@ namespace IMGUITranslationLoader.Sybaris.Patcher
 
             TypeDefinition guiContent = assembly.MainModule.GetType("UnityEngine.GUIContent");
 
-            TypeDefinition hook = hookAssembly.MainModule.GetType($"{HOOK_NAME}.TranslationHooks");
+            TypeDefinition hook = hookAssembly.MainModule.GetType($"{HOOK_NAME}.Hooks.TranslationHooks");
 
             MethodDefinition onTranslateContentText = hook.GetMethod("OnTranslateGuiContent");
 

@@ -1,26 +1,40 @@
-﻿using System.IO;
-using IMGUITranslationLoader.Hook;
+﻿using System;
+using System.IO;
+using ExIni;
+using IMGUITranslationLoader.Managed;
+using IMGUITranslationLoader.Managed.Hooks;
 using IMGUITranslationLoader.Plugin.Translation;
 using IMGUITranslationLoader.Plugin.Utils;
 using UnityEngine;
-using UnityInjector;
-using UnityInjector.Attributes;
 using Logger = IMGUITranslationLoader.Plugin.Utils.Logger;
 
 namespace IMGUITranslationLoader.Plugin
 {
-    [PluginName("IMGUITranslationLoader")]
-    public class IMGUITranslationLoader : PluginBase
+    public class IMGUITranslationLoader : MonoBehaviour
     {
         public PluginConfiguration Settings { get; private set; }
 
         private TranslationMemory Memory { get; set; }
 
+        private IniFile Preferences { get; set; }
+
+        private string DataPath { get; } = Path.Combine(Environment.CurrentDirectory, "IMGUITranslationLoader");
+
+        private string ConfigPath { get; set; }
+
         public void Awake()
         {
             DontDestroyOnLoad(this);
 
+            if(!Directory.Exists(DataPath))
+                Directory.CreateDirectory(DataPath);
+
+            Preferences = !File.Exists(ConfigPath) ? new IniFile() : IniFile.FromFile(Path.Combine(DataPath, "IMGUITranslationLoader.ini"));
+
             Memory = new TranslationMemory(DataPath);
+            
+            ConfigPath = Path.Combine(DataPath, "IMGUITranslationLoader.ini");
+
 
             InitConfig();
 
@@ -28,6 +42,19 @@ namespace IMGUITranslationLoader.Plugin
 
             TranslationHooks.Translate = Translate;
             Logger.WriteLine("Hooking complete");
+        }
+
+        private void ReloadConfig()
+        {
+            if (!File.Exists(ConfigPath))
+                return;
+            IniFile ini = IniFile.FromFile(ConfigPath);
+            Preferences.Merge(ini);
+        }
+
+        private void SaveConfig()
+        {
+            Preferences.Save(ConfigPath);
         }
 
         public void Update()

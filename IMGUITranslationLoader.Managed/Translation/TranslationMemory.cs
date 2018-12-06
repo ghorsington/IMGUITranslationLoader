@@ -86,15 +86,10 @@ namespace IMGUITranslationLoader.Plugin.Translation
                 return;
             isDirectoriesChecked = true;
 
-            void InitDir(string dir)
-            {
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-            }
-
             try
             {
-                InitDir(stringsPath);
+                if (!Directory.Exists(stringsPath))
+                    Directory.CreateDirectory(stringsPath);
             }
             catch (Exception e)
             {

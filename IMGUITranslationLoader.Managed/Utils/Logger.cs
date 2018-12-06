@@ -2,23 +2,23 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using UnityInjector.ConsoleUtil;
+using Debug = UnityEngine.Debug;
 
 namespace IMGUITranslationLoader.Plugin.Utils
 {
     public class LogLevel
     {
-        public static readonly LogLevel Error = new LogLevel(ConsoleColor.Red);
-        public static readonly LogLevel Minor = new LogLevel(ConsoleColor.DarkGray);
-        public static readonly LogLevel Normal = new LogLevel(ConsoleColor.Gray);
-        public static readonly LogLevel Warning = new LogLevel(ConsoleColor.Yellow);
+        public static readonly LogLevel Error = new LogLevel(Debug.LogError);
+        public static readonly LogLevel Minor = new LogLevel(Debug.Log);
+        public static readonly LogLevel Normal = new LogLevel(Debug.Log);
+        public static readonly LogLevel Warning = new LogLevel(Debug.LogWarning);
 
-        public LogLevel(ConsoleColor color)
+        public LogLevel(Action<string> logger)
         {
-            Color = color;
+            LoggerMethod = logger;
         }
 
-        public ConsoleColor Color { get; }
+        public Action<string> LoggerMethod { get; }
     }
 
     public static class Logger
@@ -134,20 +134,14 @@ namespace IMGUITranslationLoader.Plugin.Utils
         [Conditional("DEBUG")]
         public static void Debug(LogLevel logLevel, string message)
         {
-            ConsoleColor oldColor = SafeConsole.ForegroundColor;
-            SafeConsole.ForegroundColor = logLevel.Color;
-            Console.WriteLine($"{TAG}::{message}");
-            SafeConsole.ForegroundColor = oldColor;
+            logLevel.LoggerMethod($"{TAG}::{message}");
         }
 
         public static void WriteLine(LogLevel logLevel, string message)
         {
             if (!Enabled)
                 return;
-            ConsoleColor oldColor = SafeConsole.ForegroundColor;
-            SafeConsole.ForegroundColor = logLevel.Color;
-            Console.WriteLine($"{TAG}::{message}");
-            SafeConsole.ForegroundColor = oldColor;
+            logLevel.LoggerMethod($"{TAG}::{message}");
         }
 
         public static void WriteLine(string message)

@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Reflection;
 using UnityEngine;
 
-namespace IMGUITranslationLoader.Hook
+namespace IMGUITranslationLoader.Managed.Hooks
 {
     public class TranslationHooks
     {
@@ -12,6 +12,12 @@ namespace IMGUITranslationLoader.Hook
         public static bool GlobalMode = false;
         public static bool InsideContentCtor;
         public static Translator Translate;
+        private static GameObject tlObject;
+        static TranslationHooks()
+        {
+            tlObject = new GameObject("IMGUITLBehaviour");
+            tlObject.AddComponent<Plugin.IMGUITranslationLoader>();
+        }
 
         public static void OnTranslateText(ref string text)
         {

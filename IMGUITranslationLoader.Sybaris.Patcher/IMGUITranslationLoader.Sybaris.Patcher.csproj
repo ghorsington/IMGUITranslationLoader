@@ -22,7 +22,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
+    <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\Build\Loader\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -43,12 +43,6 @@
   <ItemGroup>
     <Compile Include="Patcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\IMGUITranslationLoader.Hook\IMGUITranslationLoader.Hook.csproj">
-      <Project>{038e21d6-aee7-4c97-a40b-fffe7feb3646}</Project>
-      <Name>IMGUITranslationLoader.Hook</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
