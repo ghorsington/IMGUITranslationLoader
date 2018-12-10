@@ -29,13 +29,12 @@ namespace IMGUITranslationLoader.Plugin
             if(!Directory.Exists(DataPath))
                 Directory.CreateDirectory(DataPath);
 
-            Preferences = !File.Exists(ConfigPath) ? new IniFile() : IniFile.FromFile(Path.Combine(DataPath, "IMGUITranslationLoader.ini"));
+            ConfigPath = Path.Combine(DataPath, "IMGUITranslationLoader.ini");
+
+            Preferences = !File.Exists(ConfigPath) ? new IniFile() : IniFile.FromFile(ConfigPath);
 
             Memory = new TranslationMemory(DataPath);
             
-            ConfigPath = Path.Combine(DataPath, "IMGUITranslationLoader.ini");
-
-
             InitConfig();
 
             Memory.LoadTranslations();
